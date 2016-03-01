@@ -16,60 +16,65 @@ include_directories(${kodiplatform_INCLUDE_DIRS}
                     ${KODI_INCLUDE_DIR}
                     ${PROJECT_SOURCE_DIR}/src
                     ${PROJECT_SOURCE_DIR}/src/template)
+                    
+file (GLOB_RECURSE ADSP_TEMPLATE_SOURCES  "src/*.c"
+                                          "src/*.cpp"
+                                          "src/*.h"
+                                          "src/*.hpp")
 
-set(TEMPLATE_SOURCES  src/ADDONOptional.cpp
-                      src/channelUpmixer.cpp
-                      src/DSPProcessor.cpp
-                      src/Dialogs/GUIDialogMasterProcess.cpp
-                      src/Dialogs/GUIDialogOutputResample.cpp
-                      src/Dialogs/GUIDialogPreProcess.cpp
-                      src/Dialogs/GUIDialogPostProcess.cpp
-                      src/template/AddonHelpers.cpp
-                      src/template/ADSPAddonHandler.cpp
-                      src/template/ADSPHelpers.cpp
-                      src/template/ADSPProcessorHandle.cpp
-                      src/template/client.cpp
-                      src/template/GUIDialogBase.cpp
-                      src/template/IADDONOptional.cpp
-                      src/template/IADSPProcessor.cpp
-                      src/template/Settings/SettingsManager.cpp
-                      src/template/Settings/SettingsHelpers.cpp
-                      src/template/Messages/ADSPModeMessage.cpp
-                      src/template/configuration/templateConfiguration.cpp
+# set(TEMPLATE_SOURCES  src/ADDONOptional.cpp
+                      # src/channelUpmixer.cpp
+                      # src/DSPProcessor.cpp
+                      # src/Dialogs/GUIDialogMasterProcess.cpp
+                      # src/Dialogs/GUIDialogOutputResample.cpp
+                      # src/Dialogs/GUIDialogPreProcess.cpp
+                      # src/Dialogs/GUIDialogPostProcess.cpp
+                      # src/template/AddonHelpers.cpp
+                      # src/template/ADSPAddonHandler.cpp
+                      # src/template/ADSPHelpers.cpp
+                      # src/template/ADSPProcessorHandle.cpp
+                      # src/template/client.cpp
+                      # src/template/GUIDialogBase.cpp
+                      # src/template/IADDONOptional.cpp
+                      # src/template/IADSPProcessor.cpp
+                      # src/template/Settings/SettingsManager.cpp
+                      # src/template/Settings/SettingsHelpers.cpp
+                      # src/template/Messages/ADSPModeMessage.cpp
+                      # src/template/configuration/templateConfiguration.cpp
                       
-                      src/template/AddonExceptions/IAddonException.h
-                      src/template/AddonExceptions/TAddonException.h
-                      src/template/configuration/templateConfiguration.h
+                      # src/template/AddonExceptions/IAddonException.h
+                      # src/template/AddonExceptions/TAddonException.h
+                      # src/template/configuration/templateConfiguration.h
                       
-                      src/template/include/ADSPAddonHandler.h
-                      src/template/include/ADSPModeMessage.h
-                      src/template/include/ADSPProcessorHandle.h
-                      src/template/include/checkTemplateConfig.h
-                      src/template/include/client.h
-                      src/template/include/GUIDialogBase.h
-                      src/template/include/IADDONOptional.h
-                      src/template/include/IADSPProcessor.h
-                      src/template/include/MACROHelper.h
-                      src/template/include/typedefs.h
+                      # src/template/include/ADSPAddonHandler.h
+                      # src/template/include/ADSPModeMessage.h
+                      # src/template/include/ADSPProcessorHandle.h
+                      # src/template/include/checkTemplateConfig.h
+                      # src/template/include/client.h
+                      # src/template/include/GUIDialogBase.h
+                      # src/template/include/IADDONOptional.h
+                      # src/template/include/IADSPProcessor.h
+                      # src/template/include/MACROHelper.h
+                      # src/template/include/typedefs.h
                       
-                      src/template/Settings/ISettingsElement.h
-                      src/template/Settings/SettingsHelpers.h
-                      src/template/Settings/SettingsManager.h
-                      src/template/Settings/TSettingsElement.h
+                      # src/template/Settings/ISettingsElement.h
+                      # src/template/Settings/SettingsHelpers.h
+                      # src/template/Settings/SettingsManager.h
+                      # src/template/Settings/TSettingsElement.h
                       
-                      src/Dialogs/GUIDialogMasterProcess.h
-                      src/Dialogs/GUIDialogOutputResample.h
-                      src/Dialogs/GUIDialogPostProcess.h
-                      src/Dialogs/GUIDialogPreProcess.h
+                      # src/Dialogs/GUIDialogMasterProcess.h
+                      # src/Dialogs/GUIDialogOutputResample.h
+                      # src/Dialogs/GUIDialogPostProcess.h
+                      # src/Dialogs/GUIDialogPreProcess.h
                       
-                      src/ADDONOptional.h
-                      src/channelUpmixer.h
-                      src/DSPProcessor.h)
+                      # src/ADDONOptional.h
+                      # src/channelUpmixer.h
+                      # src/DSPProcessor.h)
 
 set(DEPLIBS ${kodiplatform_LIBRARIES}
             ${platform_LIBRARIES})
 
-build_addon(adsp.template TEMPLATE DEPLIBS)
+build_addon(adsp.template ADSP_TEMPLATE DEPLIBS)
 
 # For generating the doxy
 find_package(Doxygen QUIET)
