@@ -27,6 +27,15 @@
 #include "TStatisticsADSPModes.hpp"
 #include <kodi/kodi_adsp_types.h>
 
+// Category:
+// AE_DSP_MODE_TYPE_INPUT_RESAMPLE  = 0,        /*!< @brief for input re sample */
+// AE_DSP_MODE_TYPE_PRE_PROCESS     = 1,        /*!< @brief for preprocessing */
+// AE_DSP_MODE_TYPE_MASTER_PROCESS  = 2,        /*!< @brief for master processing */
+// AE_DSP_MODE_TYPE_POST_PROCESS    = 3,        /*!< @brief for post processing */
+// AE_DSP_MODE_TYPE_OUTPUT_RESAMPLE = 4,        /*!< @brief for output re sample */
+#define REGISTER_ADSP_MODE_CLASS(ADSPMode, ID, Type)  public IADSPMode,                                                     \
+                                                      public CFactoryADSPModes::TRegisterADSPMode<ADSPMode, ID, Type>
+
 
 class CFactoryADSPModes
 {
@@ -43,13 +52,19 @@ private:
 
   typedef struct ADSPModeKey_t
   {
-    int  ModeID;
-    int  ModeCategory;
+    int               ModeID;
+    AE_DSP_MODE_TYPE  ModeType;
 
-    ADSPModeKey_t(int ID, int Category)
+    ADSPModeKey_t()
+    {
+      ModeID = -1;
+      ModeType = AE_DSP_MODE_TYPE_UNDEFINED;
+    }
+
+    ADSPModeKey_t(int ID, AE_DSP_MODE_TYPE Type)
     {
       ModeID        = ID;
-      ModeCategory  = Category;
+      ModeType      = Type;
     }
   }ADSPModeKey_t;
 
@@ -58,14 +73,15 @@ private:
   public:
     bool operator()(const ADSPModeKey_t &Obj1, const ADSPModeKey_t &Obj2)
     {
-      return  Obj1.ModeID < Obj2.ModeID || (Obj1.ModeID == Obj2.ModeID  && Obj1.ModeCategory < Obj2.ModeCategory);
+      return  Obj1.ModeID < Obj2.ModeID || (Obj1.ModeID == Obj2.ModeID  && Obj1.ModeType < Obj2.ModeType);
     }
   };
 
   typedef std::map<ADSPModeKey_t, ADSPModeCallbacks_t, CADSPModeKeyCmp> ADSPModeMap_t;
+  typedef std::map<std::string, ADSPModeKey_t> ADSPModeNameMap_t;
 
 public:
-  template<class TADSPMode, int TID, int TCategory>
+  template<class TADSPMode, const char* TModeName, AE_DSP_MODE_TYPE TType>
   class TRegisterADSPMode : public TStatisticsADSPModes<TADSPMode>
   {
     friend class CFactoryADSPModes;
@@ -74,7 +90,8 @@ public:
     TRegisterADSPMode() : m_HiddenProductID(ModeID) {} // force registration by assinging ModeID to m_HiddenID
 
     static const int  ModeID;
-    static const int  ModeCategory;
+    static const AE_DSP_MODE_TYPE ModeType;
+    static const char* ModeName;
 
     static IADSPMode* Create() { return dynamic_cast<IADSPMode*>(new TADSPMode); }
 
@@ -83,12 +100,12 @@ public:
     static ADSPModeCallbacks_t m_Callbacks;
   };
 
-  static AE_DSP_ERROR Create(int ModeID, int ModeCategory, IADSPMode *&InterfacePtr);
+  static AE_DSP_ERROR Create(int ModeID, AE_DSP_MODE_TYPE ModeType, IADSPMode *&InterfacePtr);
   static AE_DSP_ERROR Destroy(IADSPMode *&ADSPMode);
-  static int RegisterADSPMode(int ModeID, int ModeCategory, ADSPModeCallbacks_t Callbacks);
-  static int GetActiveADSPMode(int ModeID, int ModeCategory);
-  static int GetCreatedADSPMode(int ModeID, int ModeCategory);
-  static int GetDestroyedADSPMode(int ModeID, int ModeCategory);
+  static int RegisterADSPMode(const char* ModeName, AE_DSP_MODE_TYPE ModeType, ADSPModeCallbacks_t Callbacks);
+  static int GetActiveADSPMode(std::string &ModeName);
+  static int GetCreatedADSPMode(std::string &ModeName);
+  static int GetDestroyedADSPMode(std::string &ModeName);
 
 private:
   // Force initialization and creation of product map by using a static method and a std::map
@@ -98,21 +115,27 @@ private:
 
     return s_ADSPModes;
   }
+
+  static ADSPModeNameMap_t m_ModeNameMappingTable;
 };
 
-template<class TADSPMode, int TID, int TCategory>
-const int CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TID, TCategory>::ModeID =
-CFactoryADSPModes::TRegisterADSPMode(TID, TCategory, CFactoryADSPModes::TRegisterProduct<class TADSPMode, int TID, int TCategory>::m_Callbacks);
 
-template<class TADSPMode, int TID, int TCategory>
-const int  CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TID, TCategory>::ModeCategory = TCategory;
+template<class TADSPMode, const char* TModeName, AE_DSP_MODE_TYPE TType>
+const int CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TModeName, TType>::ModeID =
+CFactoryADSPModes::TRegisterADSPMode(TID, TType, CFactoryADSPModes::TRegisterProduct<TADSPMode, TModeName, TType>::m_Callbacks);
 
-template<class TADSPMode, int TID, int TCategory>
+template<class TADSPMode, const char* TModeName, AE_DSP_MODE_TYPE TType>
+const int  CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TModeName, TType>::ModeType = TType;
+
+template<class TADSPMode, const char* TModeName, AE_DSP_MODE_TYPE TType>
+const int  CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TModeName, TType>::ModeName = TModeName;
+
+template<class TADSPMode, const char* TModeName, AE_DSP_MODE_TYPE TType>
 CFactoryADSPModes::ADSPModeCallbacks_t
-CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TID, TCategory>::m_Callbacks =
+CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TModeName, TType>::m_Callbacks =
 {
-  CFactoryADSPModes::TRegisterProduct<TADSPMode, TID, TCategory>::Create,
-  CFactoryADSPModes::TRegisterProduct<TADSPMode, TID, TCategory>::GetActiveADSPMode,
-  CFactoryADSPModes::TRegisterProduct<TADSPMode, TID, TCategory>::GetCreatedADSPMode,
-  CFactoryADSPModes::TRegisterProduct<TADSPMode, TID, TCategory>::GetDestroyedADSPMode
+  CFactoryADSPModes::TRegisterProduct<TADSPMode, TModeName, TType>::Create,
+  CFactoryADSPModes::TRegisterProduct<TADSPMode, TModeName, TType>::GetActiveADSPMode,
+  CFactoryADSPModes::TRegisterProduct<TADSPMode, TModeName, TType>::GetCreatedADSPMode,
+  CFactoryADSPModes::TRegisterProduct<TADSPMode, TModeName, TType>::GetDestroyedADSPMode
 };
