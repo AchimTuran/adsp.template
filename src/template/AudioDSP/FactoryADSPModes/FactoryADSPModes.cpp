@@ -55,7 +55,7 @@ AE_DSP_ERROR CFactoryADSPModes::Destroy(IADSPMode *&ADSPMode)
 }
 
 
-int CFactoryADSPModes::RegisterADSPMode(const char* ModeName, AE_DSP_MODE_TYPE ModeType, ADSPModeCallbacks_t Callbacks)
+int CFactoryADSPModes::RegisterADSPMode(const std::string ModeName, AE_DSP_MODE_TYPE ModeType, ADSPModeCallbacks_t Callbacks)
 {
   static int modeID=0;
   ADSPModeKey_t ADSPModeKey(modeID, ModeType);
@@ -65,7 +65,7 @@ int CFactoryADSPModes::RegisterADSPMode(const char* ModeName, AE_DSP_MODE_TYPE M
     GetADSPModeMap()[ADSPModeKey] = Callbacks;
   }
 
-  m_ModeNameMappingTable[string(ModeName)] = ADSPModeKey;
+  m_ModeNameMappingTable[ModeName] = ADSPModeKey;
 
   return modeID++;
 }

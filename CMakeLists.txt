@@ -166,7 +166,17 @@ set(ADSP_TEMPLATE_SOURCES     src/ADDONOptional.cpp
                               src/template/AudioDSP/FactoryADSPModes/FactoryADSPModes.hpp
                               src/template/AudioDSP/FactoryADSPModes/IADSPMode.hpp
                               src/template/AudioDSP/FactoryADSPModes/TStatisticsADSPModes.hpp
-                              src/template/AudioDSP/Handler/ADSPAddonHandler.hpp)
+                              src/template/AudioDSP/Handler/ADSPAddonHandler.hpp
+                              src/template/AudioDSP/Helpers/TADSPModeSettings.hpp
+                              
+                              # Processing Modes
+                              src/ADSPModeInfos.h
+                              src/ADSPModeInfos.cpp
+                              
+                              src/PreProcessCpyModeSettings.cpp
+                              src/PreProcessCpyModeSettings.hpp
+                              src/PreProcessCpy.cpp
+                              src/PreProcessCpy.hpp)
                               
 addon_source_group("${ADSP_TEMPLATE_SOURCES}")
                                           

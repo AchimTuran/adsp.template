@@ -21,20 +21,21 @@
 
 
 
-#include <map>
-
 #include "IADSPMode.hpp"
 #include "TStatisticsADSPModes.hpp"
+#include "AudioDSP/Helpers/TADSPModeSettings.hpp"
 #include <kodi/kodi_adsp_types.h>
 
-// Category:
+#include <map>
+
+// Type:
 // AE_DSP_MODE_TYPE_INPUT_RESAMPLE  = 0,        /*!< @brief for input re sample */
 // AE_DSP_MODE_TYPE_PRE_PROCESS     = 1,        /*!< @brief for preprocessing */
 // AE_DSP_MODE_TYPE_MASTER_PROCESS  = 2,        /*!< @brief for master processing */
 // AE_DSP_MODE_TYPE_POST_PROCESS    = 3,        /*!< @brief for post processing */
 // AE_DSP_MODE_TYPE_OUTPUT_RESAMPLE = 4,        /*!< @brief for output re sample */
-#define REGISTER_ADSP_MODE_CLASS(ADSPMode, ID, Type)  public IADSPMode,                                                     \
-                                                      public CFactoryADSPModes::TRegisterADSPMode<ADSPMode, ID, Type>
+#define REGISTER_ADSP_MODE_CLASS(ADSPMode, ModeName, Type)  public IADSPMode,                                                         \
+                                                            public CFactoryADSPModes::TRegisterADSPMode<ADSPMode, ModeName, Type>
 
 
 class CFactoryADSPModes
@@ -81,13 +82,13 @@ private:
   typedef std::map<std::string, ADSPModeKey_t> ADSPModeNameMap_t;
 
 public:
-  template<class TADSPMode, const char* TModeName, AE_DSP_MODE_TYPE TType>
+  template<class TADSPMode, class TModeName, AE_DSP_MODE_TYPE TType>
   class TRegisterADSPMode : public TStatisticsADSPModes<TADSPMode>
   {
     friend class CFactoryADSPModes;
 
   public:
-    TRegisterADSPMode() : m_HiddenProductID(ModeID) {} // force registration by assinging ModeID to m_HiddenID
+    TRegisterADSPMode() : m_HiddenID(ModeID) {} // force registration by assinging ModeID to m_HiddenID
 
     static const int  ModeID;
     static const AE_DSP_MODE_TYPE ModeType;
@@ -102,7 +103,7 @@ public:
 
   static AE_DSP_ERROR Create(int ModeID, AE_DSP_MODE_TYPE ModeType, IADSPMode *&InterfacePtr);
   static AE_DSP_ERROR Destroy(IADSPMode *&ADSPMode);
-  static int RegisterADSPMode(const char* ModeName, AE_DSP_MODE_TYPE ModeType, ADSPModeCallbacks_t Callbacks);
+  static int RegisterADSPMode(const std::string ModeName, AE_DSP_MODE_TYPE ModeType, ADSPModeCallbacks_t Callbacks);
   static int GetActiveADSPMode(std::string &ModeName);
   static int GetCreatedADSPMode(std::string &ModeName);
   static int GetDestroyedADSPMode(std::string &ModeName);
@@ -120,22 +121,22 @@ private:
 };
 
 
-template<class TADSPMode, const char* TModeName, AE_DSP_MODE_TYPE TType>
+template<class TADSPMode, class TModeName, AE_DSP_MODE_TYPE TType>
 const int CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TModeName, TType>::ModeID =
-CFactoryADSPModes::TRegisterADSPMode(TID, TType, CFactoryADSPModes::TRegisterProduct<TADSPMode, TModeName, TType>::m_Callbacks);
+CFactoryADSPModes::RegisterADSPMode(TModeName::ModeName, TType, CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TModeName, TType>::m_Callbacks);
 
-template<class TADSPMode, const char* TModeName, AE_DSP_MODE_TYPE TType>
+template<class TADSPMode, class TModeName, AE_DSP_MODE_TYPE TType>
 const int  CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TModeName, TType>::ModeType = TType;
 
-template<class TADSPMode, const char* TModeName, AE_DSP_MODE_TYPE TType>
-const int  CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TModeName, TType>::ModeName = TModeName;
+template<class TADSPMode, class TModeName, AE_DSP_MODE_TYPE TType>
+const int  CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TModeName, TType>::ModeName = TModeName::ModeName;
 
-template<class TADSPMode, const char* TModeName, AE_DSP_MODE_TYPE TType>
+template<class TADSPMode, class TModeName, AE_DSP_MODE_TYPE TType>
 CFactoryADSPModes::ADSPModeCallbacks_t
 CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TModeName, TType>::m_Callbacks =
 {
-  CFactoryADSPModes::TRegisterProduct<TADSPMode, TModeName, TType>::Create,
-  CFactoryADSPModes::TRegisterProduct<TADSPMode, TModeName, TType>::GetActiveADSPMode,
-  CFactoryADSPModes::TRegisterProduct<TADSPMode, TModeName, TType>::GetCreatedADSPMode,
-  CFactoryADSPModes::TRegisterProduct<TADSPMode, TModeName, TType>::GetDestroyedADSPMode
+  CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TModeName, TType>::Create,
+  CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TModeName, TType>::GetActiveADSPMode,
+  CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TModeName, TType>::GetCreatedADSPMode,
+  CFactoryADSPModes::TRegisterADSPMode<TADSPMode, TModeName, TType>::GetDestroyedADSPMode
 };

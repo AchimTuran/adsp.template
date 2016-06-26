@@ -26,7 +26,7 @@ class TStatisticsADSPModes
 public:
   TStatisticsADSPModes()
   {
-    m_CreatedTADSPModes++;
+    m_CreatedADSPModes++;
     m_ActiveADSPModes++;
   }
 
